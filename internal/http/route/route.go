@@ -18,9 +18,10 @@ func (c *RouteConfig) Setup() {
 }
 
 func (c *RouteConfig) SetupAuthRoute() {
-	c.App.Use(c.AuthMiddleware)
+	group := c.App.Group("/api/v1")
+	group.Use(c.AuthMiddleware)
 
-	c.App.Get("api/v1/profile", func(ctx *fiber.Ctx) error {
+	group.Get("profile", func(ctx *fiber.Ctx) error {
 		user := ctx.Locals("user")
 		return ctx.JSON(fiber.Map{
 			"status": "success",

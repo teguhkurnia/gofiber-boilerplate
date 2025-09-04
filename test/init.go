@@ -2,6 +2,7 @@ package test
 
 import (
 	"gofiber-boilerplate/internal/config"
+	"gofiber-boilerplate/internal/util"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -26,12 +27,16 @@ func init() {
 	validate = config.NewValidator()
 	app = config.NewFiber(viperConfig)
 	db = config.NewDatabase(viperConfig, log, true)
+	redis := config.NewRedis(viperConfig)
+	tokenUtil := util.NewTokenUtil(redis, viperConfig, log)
 
 	config.Bootstrap(&config.BootstrapConfig{
-		DB:       db,
-		App:      app,
-		Log:      log,
-		Validate: validate,
-		Config:   viperConfig,
+		DB:        db,
+		App:       app,
+		Log:       log,
+		Validate:  validate,
+		Config:    viperConfig,
+		Redis:     redis,
+		TokenUtil: tokenUtil,
 	})
 }

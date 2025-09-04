@@ -28,7 +28,6 @@ func (c *UserController) Register(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	request.IpAddress = ctx.IP()
 	reponse, err := c.UseCase.Create(ctx.UserContext(), request)
 	if err != nil {
 		c.Log.Warnf("Failed to create user: %v", err)
@@ -48,7 +47,6 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	request.IpAddress = ctx.IP()
 	reponse, err := c.UseCase.Login(ctx.UserContext(), request)
 	if err != nil {
 		c.Log.Warnf("Failed to login user: %v", err)

@@ -1,8 +1,8 @@
 default: dev
 
 dev:
-	go run cmd/web/main.go;
+	go run cmd/web/main.go
 
 .PHONY: test
 test:
-	go test -v ./test;
+	go test -v ./test

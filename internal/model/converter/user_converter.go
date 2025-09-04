@@ -7,8 +7,8 @@ import (
 
 func UserToResponse(user *entity.User, token string) *model.UserResponse {
 	return &model.UserResponse{
-		ID:       uint(user.ID),
-		Username: user.Username,
-		Token:    token,
+		ID:    uint(user.ID),
+		Email: user.Email,
+		Token: token,
 	}
 }

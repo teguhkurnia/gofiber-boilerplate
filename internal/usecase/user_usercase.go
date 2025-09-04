@@ -47,14 +47,14 @@ func (c *UserUseCase) Create(ctx context.Context, request *model.RegisterUserReq
 		return nil, fiber.ErrBadRequest
 	}
 
-	total, err := c.UserRepository.CountByUsernameOrEmail(tx, request.Username, request.Email)
+	total, err := c.UserRepository.CountByEmail(tx, request.Email)
 	if err != nil {
 		c.Log.Warnf("Failed to count user: %v", err)
 		return nil, fiber.ErrInternalServerError
 	}
 
 	if total > 0 {
-		c.Log.Warnf("Username or email already exists: %s, %s", request.Username, request.Email)
+		c.Log.Warnf("Email already exists: %s", request.Email)
 		return nil, fiber.ErrConflict
 	}
 
@@ -66,7 +66,7 @@ func (c *UserUseCase) Create(ctx context.Context, request *model.RegisterUserReq
 
 	now := time.Now()
 	user := &entity.User{
-		Username:  request.Username,
+		Name:      request.Name,
 		Email:     request.Email,
 		Password:  string(password),
 		CreatedAt: now,
@@ -101,10 +101,10 @@ func (c *UserUseCase) Login(ctx context.Context,
 		return nil, fiber.ErrBadRequest
 	}
 
-	user, err := c.UserRepository.FindByUsernameOrEmail(c.DB, request.Identifier)
+	user, err := c.UserRepository.FindByEmail(c.DB, request.Email)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.Log.Warnf("User not found: %s", request.Identifier)
+			c.Log.Warnf("User not found: %s", request.Email)
 			return nil, fiber.ErrUnauthorized
 		}
 		c.Log.Warnf("Failed to find user: %v", err)
@@ -112,7 +112,7 @@ func (c *UserUseCase) Login(ctx context.Context,
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {
-		c.Log.Warnf("Invalid password for user: %s", request.Identifier)
+		c.Log.Warnf("Invalid password for user: %s", request.Email)
 		return nil, fiber.ErrUnauthorized
 	}
 
