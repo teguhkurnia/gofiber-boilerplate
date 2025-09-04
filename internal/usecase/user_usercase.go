@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
@@ -65,12 +66,14 @@ func (c *UserUseCase) Create(ctx context.Context, request *model.RegisterUserReq
 	}
 
 	now := time.Now()
+	verificationCode := uuid.New().String()
 	user := &entity.User{
-		Name:      request.Name,
-		Email:     request.Email,
-		Password:  string(password),
-		CreatedAt: now,
-		UpdatedAt: now,
+		Name:             request.Name,
+		Email:            request.Email,
+		Password:         string(password),
+		VerificationCode: &verificationCode,
+		CreatedAt:        now,
+		UpdatedAt:        now,
 	}
 
 	if err := c.UserRepository.Create(tx, user); err != nil {
@@ -123,6 +126,25 @@ func (c *UserUseCase) Login(ctx context.Context,
 	}
 
 	return converter.UserToResponse(user, token), nil
+}
+
+func (c *UserUseCase) Verify(ctx context.Context, code string) error {
+	user, err := c.UserRepository.FindByVerificationCode(c.DB, code)
+	if err != nil {
+		c.Log.Warnf("Failed to find user by verification code: %v", err)
+		return fiber.ErrNotFound
+	}
+
+	// Mark user as verified
+	now := time.Now()
+	user.VerifiedAt = &now
+	user.VerificationCode = nil
+	if err := c.UserRepository.Update(c.DB, user); err != nil {
+		c.Log.Warnf("Failed to update user: %v", err)
+		return fiber.ErrInternalServerError
+	}
+
+	return nil
 }
 
 func (c *UserUseCase) Authorize(ctx context.Context, token string) (*model.Auth, error) {

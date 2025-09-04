@@ -33,4 +33,5 @@ func (c *RouteConfig) SetupAuthRoute() {
 func (c *RouteConfig) SetupGuestRoute() {
 	c.App.Post("api/v1/login", c.UserController.Login)
 	c.App.Post("api/v1/register", c.UserController.Register)
+	c.App.Get("api/v1/verify-email/:code", c.UserController.Verify)
 }

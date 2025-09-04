@@ -34,3 +34,12 @@ func (r *UserRepository) FindByEmail(db *gorm.DB, email string) (*entity.User, e
 	}
 	return &user, nil
 }
+
+func (r *UserRepository) FindByVerificationCode(db *gorm.DB, code string) (*entity.User, error) {
+	var user entity.User
+	err := db.Where("verification_code = ?", code).Take(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}

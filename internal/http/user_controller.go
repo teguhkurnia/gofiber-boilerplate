@@ -58,3 +58,21 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 			Data: reponse,
 		})
 }
+
+func (c *UserController) Verify(ctx *fiber.Ctx) error {
+	code := ctx.Params("code")
+	if code == "" {
+		c.Log.Warnf("Missing verification code")
+		return fiber.ErrBadRequest
+	}
+
+	if err := c.UseCase.Verify(ctx.UserContext(), code); err != nil {
+		c.Log.Warnf("Failed to verify user: %v", err)
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).
+		JSON(model.WebResponse[any]{
+			Data: "User verified successfully",
+		})
+}
