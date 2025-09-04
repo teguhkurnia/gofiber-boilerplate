@@ -1,0 +1,28 @@
+app:
+  name: "GoFiber Boilerplate"
+  port: 8080
+  prefork: false
+
+database:
+  host: "localhost"
+  port: 3306
+  username: "root"
+  password: ""
+  dbname: ""
+  test_dbname: ""
+  pool:
+    iddle: 5
+    max: 100
+    lifetime: 300
+
+redis:
+  address: "localhost:6379"
+  password: ""
+  db: 0
+
+jwt:
+  secret: "your_jwt_secret_key"
+  ttl: 1440 # in minutes (1 day)
+
+logger:
+  level: 6
