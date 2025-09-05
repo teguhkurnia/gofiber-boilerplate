@@ -17,13 +17,14 @@ import (
 )
 
 type BootstrapConfig struct {
-	App       *fiber.App
-	DB        *gorm.DB
-	Redis     *redis.Client
-	Log       *logrus.Logger
-	Validate  *validator.Validate
-	Config    *viper.Viper
-	TokenUtil *util.TokenUtil
+	App             *fiber.App
+	DB              *gorm.DB
+	Redis           *redis.Client
+	Log             *logrus.Logger
+	Validate        *validator.Validate
+	Config          *viper.Viper
+	TokenUtil       *util.TokenUtil
+	RateLimiterUtil *util.RateLimiterUtil
 }
 
 func Bootstrap(config *BootstrapConfig) {
@@ -43,6 +44,7 @@ func Bootstrap(config *BootstrapConfig) {
 	userController := http.NewUserController(
 		config.Log,
 		userUseCase,
+		config.RateLimiterUtil,
 	)
 
 	// setup routes

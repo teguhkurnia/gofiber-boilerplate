@@ -3,21 +3,26 @@ package http
 import (
 	"gofiber-boilerplate/internal/model"
 	"gofiber-boilerplate/internal/usecase"
+	"gofiber-boilerplate/internal/util"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 )
 
 type UserController struct {
-	Log     *logrus.Logger
-	UseCase *usecase.UserUseCase
+	Log             *logrus.Logger
+	UseCase         *usecase.UserUseCase
+	RateLimiterUtil *util.RateLimiterUtil
 }
 
 func NewUserController(log *logrus.Logger,
-	useCase *usecase.UserUseCase) *UserController {
+	useCase *usecase.UserUseCase,
+	rateLimiterUtil *util.RateLimiterUtil,
+) *UserController {
 	return &UserController{
-		Log:     log,
-		UseCase: useCase,
+		Log:             log,
+		UseCase:         useCase,
+		RateLimiterUtil: rateLimiterUtil,
 	}
 }
 
@@ -45,6 +50,12 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(request); err != nil {
 		c.Log.Warnf("Failed to parse request body: %v", err)
 		return fiber.ErrBadRequest
+	}
+
+	err := c.RateLimiterUtil.IsAllowed(ctx, "login:"+ctx.IP(), nil)
+	if err != nil {
+		c.Log.Warnf("Rate limit exceeded: %v", err)
+		return err
 	}
 
 	reponse, err := c.UseCase.Login(ctx.UserContext(), request)
